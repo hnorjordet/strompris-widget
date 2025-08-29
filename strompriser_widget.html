@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strømpriser Oslo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2d3748;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid #4a5568;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .area-selector {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .area-selector select {
+            background: #4a5568;
+            border: 1px solid #718096;
+            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+        
+        .area-selector select option {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+        
+        .current-price {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: #4a5568;
+            border-radius: 10px;
+            border: 1px solid #718096;
+        }
+        
+        .current-price h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #cbd5e0;
+        }
+        
+        .price-big {
+            font-size: 3.5em;
+            font-weight: 600;
+            margin: 10px 0;
+            color: #68d391;
+            transition: color 0.3s ease;
+        }
+        
+        .price-big.cheap {
+            color: #68d391; /* Green */
+        }
+        
+        .price-big.moderate {
+            color: #ffd93d; /* Yellow */
+        }
+        
+        .price-big.expensive {
+            color: #f56565; /* Red */
+        }
+        
+        .price-big.very-expensive {
+            color: #e53e3e; /* Dark red */
+        }
+        
+        .price-unit {
+            font-size: 1.2em;
+            color: #a0aec0;
+        }
+        
+        .day-section {
+            margin: 20px 0;
+            background: #374151;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #4b5563;
+        }
+        
+        .day-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #4b5563;
+            color: #f7fafc;
+        }
+        
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .price-item {
+            background: #4a5568;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #718096;
+        }
+        
+        .price-item:hover {
+            background: #5a6478;
+            transform: translateY(-2px);
+        }
+        
+        .price-item.current-hour {
+            background: #2d5a27;
+            border: 2px solid #68d391;
+            box-shadow: 0 0 10px rgba(104, 211, 145, 0.2);
+        }
+        
+        .time {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #cbd5e0;
+        }
+        
+        .price {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #e2e8f0;
+            transition: color 0.3s ease;
+        }
+        
+        .price.cheap {
+            color: #68d391;
+        }
+        
+        .price.moderate {
+            color: #ffd93d;
+        }
+        
+        .price.expensive {
+            color: #f56565;
+        }
+        
+        .price.very-expensive {
+            color: #e53e3e;
+        }
+        
+        .price-options {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .price-toggle {
+            background: #4a5568;
+            border: 1px solid #718096;
+            border-radius: 6px;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .price-toggle:hover {
+            background: #5a6478;
+        }
+        
+        .price-toggle input[type="checkbox"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        
+        .price-explanation {
+            font-size: 0.85em;
+            color: #a0aec0;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #a0aec0;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 30px;
+            background: #742a2a;
+            border-radius: 10px;
+            border: 1px solid #e53e3e;
+            color: #fed7d7;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat {
+            background: #4a5568;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #718096;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #a0aec0;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #718096;
+            font-size: 0.85em;
+        }
+        
+        .footer a {
+            color: #68d391;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .refresh-button {
+            background: #4a5568;
+            border: 1px solid #718096;
+            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 8px 16px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-button:hover {
+            background: #5a6478;
+            transform: translateY(-1px);
+        }
+        
+        .toggle-button {
+            background: #4a5568;
+            border: 1px solid #718096;
+            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            display: block;
+            width: fit-content;
+        }
+        
+        .toggle-button:hover {
+            background: #5a6478;
+            transform: translateY(-1px);
+        }
+        
+        .toggle-button.active {
+            background: #2d5a27;
+            border-color: #68d391;
+            color: #68d391;
+        }
+        
+        .detailed-data {
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        
+        .detailed-data.hidden {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        .detailed-data.visible {
+            max-height: 2000px;
+            opacity: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .price-big {
+                font-size: 2.8em;
+            }
+            
+            .price-grid {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Strømpriser</h1>
+            <div class="area-selector">
+                <select id="areaSelect">
+                    <option value="NO1">NO1 - Oslo / Øst-Norge</option>
+                    <option value="NO2">NO2 - Kristiansand / Sør-Norge</option>
+                    <option value="NO3">NO3 - Trondheim / Midt-Norge</option>
+                    <option value="NO4">NO4 - Tromsø / Nord-Norge</option>
+                    <option value="NO5">NO5 - Bergen / Vest-Norge</option>
+                </select>
+                <button class="refresh-button" onclick="loadPrices()">🔄 Oppdater</button>
+            </div>
+        </div>
+        
+        <div id="currentPrice" class="current-price" style="display: none;">
+            <h2>Strømpris akkurat nå</h2>
+            <div class="price-options">
+                <label class="price-toggle">
+                    <input type="checkbox" id="includeVAT" onchange="updatePriceDisplay()"> Med MVA
+                </label>
+                <label class="price-toggle">
+                    <input type="checkbox" id="includeSupport" onchange="updatePriceDisplay()"> Med strømstøtte
+                </label>
+            </div>
+            <div class="price-big" id="currentPriceValue">-</div>
+            <div class="price-unit">NOK/kWh</div>
+            <div class="price-explanation" id="priceExplanation">
+                Spotpris uten MVA og strømstøtte
+            </div>
+        </div>
+        
+        <div id="stats" class="stats" style="display: none;">
+            <div class="stat">
+                <div class="stat-label">Laveste i dag</div>
+                <div class="stat-value" id="minPrice">-</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Høyeste i dag</div>
+                <div class="stat-value" id="maxPrice">-</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Snitt i dag</div>
+                <div class="stat-value" id="avgPrice">-</div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            Laster strømpriser...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <h3>Kunne ikke laste strømpriser</h3>
+            <p>Prøv igjen senere eller sjekk internetttilkoblingen din.</p>
+        </div>
+        
+        <button id="toggleButton" class="toggle-button" onclick="toggleDetailedData()" style="display: none;">
+            📊 Vis detaljerte timepriser
+        </button>
+        
+        <div id="detailedData" class="detailed-data hidden">
+            <div id="todaySection" class="day-section" style="display: none;">
+                <div class="day-title" id="todayTitle">I dag</div>
+                <div id="todayPrices" class="price-grid"></div>
+            </div>
+            
+            <div id="tomorrowSection" class="day-section" style="display: none;">
+                <div class="day-title" id="tomorrowTitle">I morgen</div>
+                <div id="tomorrowPrices" class="price-grid"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Strømpriser levert av <a href="https://www.hvakosterstrommen.no" target="_blank">hvakosterstrommen.no</a><br>
+            Oppdatert: <span id="lastUpdated">-</span>
+        </div>
+    </div>
+
+    <script>
+        let currentArea = 'NO1';
+        
+        // Price thresholds for color coding (NOK/kWh)
+        const PRICE_THRESHOLDS = {
+            cheap: 1.0,      // Under 1 kr = green
+            moderate: 2.0,   // 1-2 kr = yellow  
+            expensive: 3.0,  // 2-3 kr = red
+            // Over 3 kr = dark red
+        };
+        
+        // Current electricity support rules (2025)
+        const ELECTRICITY_SUPPORT = {
+            threshold: 0.73, // 73 øre threshold
+            percentage: 0.90, // 90% support above threshold
+        };
+        
+        function calculateFinalPrice(rawPrice, includeVAT, includeSupport) {
+            let price = rawPrice;
+            
+            // First add VAT if selected (except NO4 - Nord-Norge)
+            if (includeVAT && currentArea !== 'NO4') {
+                price = price * 1.25;
+            }
+            
+            // Then apply electricity support if selected
+            if (includeSupport && price > ELECTRICITY_SUPPORT.threshold) {
+                const supportAmount = (price - ELECTRICITY_SUPPORT.threshold) * ELECTRICITY_SUPPORT.percentage;
+                price = price - supportAmount;
+            }
+            
+            return price;
+        }
+        
+        function getPriceColorClass(price) {
+            if (price < PRICE_THRESHOLDS.cheap) return 'cheap';
+            if (price < PRICE_THRESHOLDS.moderate) return 'moderate';
+            if (price < PRICE_THRESHOLDS.expensive) return 'expensive';
+            return 'very-expensive';
+        }
+        
+        function updatePriceDisplay() {
+            const includeVAT = document.getElementById('includeVAT') ? document.getElementById('includeVAT').checked : false;
+            const includeSupport = document.getElementById('includeSupport') ? document.getElementById('includeSupport').checked : false;
+            
+            // Save settings
+            localStorage.setItem('includeVAT', includeVAT);
+            localStorage.setItem('includeSupport', includeSupport);
+            
+            // Update explanation
+            let explanation = 'Spotpris';
+            if (includeVAT) {
+                explanation += ` med ${currentArea === 'NO4' ? '0%' : '25%'} MVA`;
+            }
+            if (includeSupport) {
+                explanation += ' og strømstøtte';
+            }
+            if (!includeVAT && !includeSupport) {
+                explanation += ' uten MVA og strømstøtte';
+            }
+            
+            const explanationElement = document.getElementById('priceExplanation');
+            if (explanationElement) {
+                explanationElement.textContent = explanation;
+            }
+            
+            // Refresh all displays
+            if (window.currentPriceData) {
+                updateCurrentPriceDisplay();
+            }
+            if (window.todayData) {
+                updateStats(window.todayData);
+                displayPrices(window.todayData, 'today');
+            }
+            if (window.tomorrowData) {
+                displayPrices(window.tomorrowData, 'tomorrow');
+            }
+        }
+        
+        function updateCurrentPriceDisplay() {
+            if (!window.currentPriceData) return;
+            
+            const includeVAT = document.getElementById('includeVAT') ? document.getElementById('includeVAT').checked : false;
+            const includeSupport = document.getElementById('includeSupport') ? document.getElementById('includeSupport').checked : false;
+            
+            const displayPrice = calculateFinalPrice(window.currentPriceData.NOK_per_kWh, includeVAT, includeSupport);
+            const colorClass = getPriceColorClass(displayPrice);
+            
+            const priceElement = document.getElementById('currentPriceValue');
+            if (priceElement) {
+                priceElement.textContent = displayPrice.toFixed(3);
+                priceElement.className = `price-big ${colorClass}`;
+            }
+        }
+        
+        // Load preferences from localStorage
+        if (localStorage.getItem('selectedArea')) {
+            currentArea = localStorage.getItem('selectedArea');
+            document.getElementById('areaSelect').value = currentArea;
+        }
+        
+        // Load toggle state from localStorage
+        let detailedDataVisible = localStorage.getItem('detailedDataVisible') === 'true';
+        
+        function toggleDetailedData() {
+            const detailedData = document.getElementById('detailedData');
+            const toggleButton = document.getElementById('toggleButton');
+            
+            detailedDataVisible = !detailedDataVisible;
+            localStorage.setItem('detailedDataVisible', detailedDataVisible);
+            
+            if (detailedDataVisible) {
+                detailedData.classList.remove('hidden');
+                detailedData.classList.add('visible');
+                toggleButton.textContent = '📊 Skjul detaljerte timepriser';
+                toggleButton.classList.add('active');
+            } else {
+                detailedData.classList.remove('visible');
+                detailedData.classList.add('hidden');
+                toggleButton.textContent = '📊 Vis detaljerte timepriser';
+                toggleButton.classList.remove('active');
+            }
+        }
+        
+        // Initialize toggle state
+        function initializeToggle() {
+            const detailedData = document.getElementById('detailedData');
+            const toggleButton = document.getElementById('toggleButton');
+            
+            if (detailedDataVisible) {
+                detailedData.classList.remove('hidden');
+                detailedData.classList.add('visible');
+                toggleButton.textContent = '📊 Skjul detaljerte timepriser';
+                toggleButton.classList.add('active');
+            } else {
+                detailedData.classList.add('hidden');
+                toggleButton.textContent = '📊 Vis detaljerte timepriser';
+            }
+            
+            toggleButton.style.display = 'block';
+        }
+        
+        document.getElementById('areaSelect').addEventListener('change', function() {
+            currentArea = this.value;
+            localStorage.setItem('selectedArea', currentArea);
+            loadPrices();
+        });
+        
+        async function loadPrices() {
+            showLoading();
+            
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            try {
+                // Load today's prices
+                const todayData = await fetchPrices(now);
+                if (todayData && todayData.length > 0) {
+                    window.todayData = todayData; // Store for price mode updates
+                    displayPrices(todayData, 'today');
+                    updateCurrentPrice(todayData);
+                    updateStats(todayData);
+                }
+                
+                // Try to load tomorrow's prices (available after 13:00)
+                try {
+                    const tomorrowData = await fetchPrices(tomorrow);
+                    if (tomorrowData && tomorrowData.length > 0) {
+                        window.tomorrowData = tomorrowData; // Store for price mode updates
+                        displayPrices(tomorrowData, 'tomorrow');
+                    }
+                } catch (e) {
+                    // Tomorrow's prices not available yet
+                    console.log('Tomorrow prices not available yet');
+                    document.getElementById('tomorrowSection').style.display = 'none';
+                }
+                
+                hideLoading();
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString('no-NO');
+                initializeToggle();
+                initializePriceSettings();
+                
+            } catch (error) {
+                console.error('Error loading prices:', error);
+                showError();
+            }
+        }
+        
+        async function fetchPrices(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            const url = `https://www.hvakosterstrommen.no/api/v1/prices/${year}/${month}-${day}_${currentArea}.json`;
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        function displayPrices(data, dayType) {
+            const sectionId = dayType === 'today' ? 'todaySection' : 'tomorrowSection';
+            const pricesId = dayType === 'today' ? 'todayPrices' : 'tomorrowPrices';
+            const titleId = dayType === 'today' ? 'todayTitle' : 'tomorrowTitle';
+            
+            const section = document.getElementById(sectionId);
+            const pricesContainer = document.getElementById(pricesId);
+            const title = document.getElementById(titleId);
+            
+            if (!section || !pricesContainer || !title) return;
+            
+            // Set title with date
+            const date = new Date(data[0].time_start);
+            const dateStr = date.toLocaleDateString('no-NO', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long' 
+            });
+            title.textContent = dayType === 'today' ? `I dag (${dateStr})` : `I morgen (${dateStr})`;
+            
+            pricesContainer.innerHTML = '';
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            const includeVAT = document.getElementById('includeVAT') ? document.getElementById('includeVAT').checked : false;
+            const includeSupport = document.getElementById('includeSupport') ? document.getElementById('includeSupport').checked : false;
+            
+            data.forEach(item => {
+                const startTime = new Date(item.time_start);
+                const hour = startTime.getHours();
+                const isCurrentHour = dayType === 'today' && hour === currentHour;
+                
+                const priceItem = document.createElement('div');
+                priceItem.className = `price-item ${isCurrentHour ? 'current-hour' : ''}`;
+                
+                const displayPrice = calculateFinalPrice(item.NOK_per_kWh, includeVAT, includeSupport);
+                const colorClass = getPriceColorClass(displayPrice);
+                
+                priceItem.innerHTML = `
+                    <div class="time">${String(hour).padStart(2, '0')}:00</div>
+                    <div class="price ${colorClass}">${displayPrice.toFixed(3)} kr</div>
+                `;
+                
+                pricesContainer.appendChild(priceItem);
+            });
+            
+            section.style.display = 'block';
+        }
+        
+        function updateCurrentPrice(data) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            const currentPriceData = data.find(item => {
+                const startTime = new Date(item.time_start);
+                return startTime.getHours() === currentHour;
+            });
+            
+            if (currentPriceData) {
+                window.currentPriceData = currentPriceData; // Store for updates
+                updateCurrentPriceDisplay();
+                document.getElementById('currentPrice').style.display = 'block';
+            }
+        }
+        
+        function updateStats(data) {
+            const includeVAT = document.getElementById('includeVAT') ? document.getElementById('includeVAT').checked : false;
+            const includeSupport = document.getElementById('includeSupport') ? document.getElementById('includeSupport').checked : false;
+            
+            const prices = data.map(item => calculateFinalPrice(item.NOK_per_kWh, includeVAT, includeSupport));
+            const min = Math.min(...prices);
+            const max = Math.max(...prices);
+            const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+            
+            const minElement = document.getElementById('minPrice');
+            const maxElement = document.getElementById('maxPrice');
+            const avgElement = document.getElementById('avgPrice');
+            const statsElement = document.getElementById('stats');
+            
+            if (minElement) minElement.textContent = min.toFixed(3) + ' kr';
+            if (maxElement) maxElement.textContent = max.toFixed(3) + ' kr';
+            if (avgElement) avgElement.textContent = avg.toFixed(3) + ' kr';
+            if (statsElement) statsElement.style.display = 'grid';
+        }
+        
+        function initializePriceSettings() {
+            // Load saved settings
+            const savedVAT = localStorage.getItem('includeVAT') === 'true';
+            const savedSupport = localStorage.getItem('includeSupport') === 'true';
+            
+            const vatCheckbox = document.getElementById('includeVAT');
+            const supportCheckbox = document.getElementById('includeSupport');
+            
+            if (vatCheckbox) vatCheckbox.checked = savedVAT;
+            if (supportCheckbox) supportCheckbox.checked = savedSupport;
+            
+            // Initial price display update
+            setTimeout(() => {
+                updatePriceDisplay();
+            }, 100);
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('currentPrice').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('todaySection').style.display = 'none';
+            document.getElementById('tomorrowSection').style.display = 'none';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+        
+        // Load prices on page load
+        loadPrices();
+        
+        // Auto-refresh every 30 minutes
+        setInterval(loadPrices, 30 * 60 * 1000);
+    </script>
+</body>
+</html>
